@@ -41,7 +41,7 @@ def test_filter_by_status_narrows_board(tasks_page):
     tasks_page.open_board()
     total = len(tasks_page.visible_cards())
     tasks_page.filter_by_status(SEEDED_STATUS_NAME)
-    filtered = len(tasks_page.visible_cards())
+    filtered = tasks_page.wait_for_card_count_change(total)
     assert 0 < filtered < total, f"Фильтр не сузил выдачу: было {total}, стало {filtered}"
 
 

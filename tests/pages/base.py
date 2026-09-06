@@ -85,6 +85,22 @@ class BasePage:
                 return False
         return True
 
+    def element_stays_visible(self, locator: tuple[str, str], samples: int = 4) -> bool:
+        """Элемент появился и остался виден.
+
+        То же, что `text_stays_visible`, но по локатору: нужно там, где
+        проверяется значение поля, а не текст на странице.
+        """
+        try:
+            element = self.visible(locator)
+        except TimeoutException:
+            return False
+        for _ in range(samples):
+            time.sleep(SETTLE_INTERVAL)
+            if not element.is_displayed():
+                return False
+        return True
+
     def wait_text_gone(self, text: str, tag: str = "*") -> bool:
         locator = (By.XPATH, by_text(text, tag))
         try:

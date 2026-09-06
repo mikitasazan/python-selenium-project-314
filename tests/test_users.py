@@ -23,8 +23,9 @@ def test_create_user_adds_row(users_page, unique):
 
 def test_edit_form_prefills_record(users_page):
     users_page.open_row(SEEDED_USER_EMAIL)
-    field = users_page.visible((By.CSS_SELECTOR, 'input[name="email"]'))
-    assert field.get_attribute("value") == SEEDED_USER_EMAIL
+    email_field = (By.CSS_SELECTOR, 'input[name="email"]')
+    assert users_page.element_stays_visible(email_field), "Форма правки не держится на экране"
+    assert users_page.visible(email_field).get_attribute("value") == SEEDED_USER_EMAIL
 
 
 def test_edit_user_updates_row(users_page, unique):

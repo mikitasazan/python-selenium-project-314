@@ -18,8 +18,15 @@ class TasksPage(BasePage):
     route = "tasks"
 
     def open_board(self) -> None:
+        """Открыть доску и дождаться, пока она отрисуется.
+
+        Колонки приходят отдельным запросом за статусами, позже кнопки
+        «Создать». Без ожидания колонки чтение доски на медленной машине
+        попадает в пустой кадр.
+        """
         self.open()
         self.clickable((By.CSS_SELECTOR, '[aria-label="Create"]'))
+        self.visible((By.XPATH, f"//{COLUMN}"))
 
     # --- чтение доски ----------------------------------------------------
 
@@ -27,6 +34,22 @@ class TasksPage(BasePage):
         self.visible((By.XPATH, f"//{CARD}"))
         cards = self.driver.find_elements(By.XPATH, f"//{CARD}")
         return [card for card in cards if card.is_displayed()]
+
+    def count_visible_cards(self) -> int:
+        """Сколько карточек видно прямо сейчас, без ожидания."""
+        cards = self.driver.find_elements(By.XPATH, f"//{CARD}")
+        return sum(1 for card in cards if card.is_displayed())
+
+    def wait_for_card_count_change(self, previous: int) -> int:
+        """Дождаться, пока доска пересоберётся после фильтра.
+
+        Считать сразу после клика нельзя: на экране ещё прежняя выдача.
+        """
+        try:
+            self.wait.until(lambda _: self.count_visible_cards() != previous)
+        except TimeoutException:
+            pass
+        return self.count_visible_cards()
 
     def visible_column_titles(self) -> list[str]:
         titles = self.driver.find_elements(By.XPATH, f"//{COLUMN}/preceding-sibling::*[1]")
